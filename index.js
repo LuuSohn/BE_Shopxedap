@@ -5,6 +5,8 @@ import cors from "cors";
 import connectDB from "./src/config/database.js";
 import cateRouter from "./src/routers/category.js";
 import productRouter from "./src/routers/product.js";
+import userRouter from "./src/routers/user.js";
+
 const app = express();
 const port = process.env.PORT || 8080;
 dotenv.config();
@@ -17,8 +19,10 @@ app.use(express.json());
 app.use(morgan("shopxedap"));
 app.use(cors());
 
+// routes
 app.use("/api", cateRouter)
 app.use("/api", productRouter);
+app.use("/api", userRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
