@@ -7,12 +7,14 @@ import {
   comment
 } from "../controllers/user.js";
 
+import { authenticate } from "../middlewares/authenticate.js";
+
 const router = Router();
 
-router.get("/user/profile", getUserProfile);
-router.post("/user/comment", comment);
-router.put("/user/update", updateUserProfile);
-router.put("/cart", updateCart);
-router.delete("/cart/:id", deleteCart);
+router.get("/user/profile",authenticate, getUserProfile);
+router.post("/user/comment", authenticate,comment);
+router.put("/user/update", authenticate,updateUserProfile);
+router.put("/cart", authenticate,updateCart);
+router.delete("/cart/:id",authenticate, deleteCart);
 
 export default router;

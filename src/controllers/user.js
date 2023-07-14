@@ -9,7 +9,7 @@ export const getUserProfile = async (req, res) => {
       },
     ];
 
-    const user = await User.findById(req.user._id).populate(populateOptions);
+    const user = await User.findById(req.user?._id).populate(populateOptions);
 
     if (!user) {
       return res
@@ -28,7 +28,7 @@ export const getUserProfile = async (req, res) => {
 };
 export const updateUserProfile = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
     const userDate = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(userId, userDate, {
@@ -48,7 +48,7 @@ export const updateUserProfile = async (req, res) => {
 
 export const updateCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
     const { productId, quantity } = req.body;
 
     if (!productId || !quantity) {
@@ -81,7 +81,7 @@ export const updateCart = async (req, res) => {
 
 export const deleteCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
     const productId = req.params.id;
 
     const user = await User.findById(userId).select("cart");
@@ -105,7 +105,7 @@ export const deleteCart = async (req, res) => {
 };
 export const comment = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
     const { productId, description } = req.body;
 
     const product = await Product.findById(productId);
