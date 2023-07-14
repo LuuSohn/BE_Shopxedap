@@ -3,7 +3,7 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 const Category = new Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: true,unique:true,index:true,},
     productId: [{ type: Types.ObjectId, ref: "Product", required: true }],
     createdAt: { type: Date },
     updatedAt: { type: Date },
