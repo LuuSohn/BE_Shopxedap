@@ -7,6 +7,14 @@ const Product = new Schema(
     price: { type: Number, required: true, min: 0 },
     image: { type: String, required: true },
     description: { type: String, required: true },
+    color: {
+      type: String,
+      enum: ['Black', 'Grown', 'Red']
+    },
+    quantity: {
+      type: Number,
+      default: 0
+    },
     categoryId: { type: Types.ObjectId, ref: "Category", required: true },
     comments: [
       {

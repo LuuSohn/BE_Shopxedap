@@ -1,5 +1,7 @@
 import User from "../models/user.js";
-import Product from "../models/product.js";
+
+
+
 export const getUserProfile = async (req, res) => {
   try {
     const populateOptions = [
@@ -48,78 +50,55 @@ export const updateUserProfile = async (req, res) => {
 
 export const updateCart = async (req, res) => {
   try {
-    const userId = req.user?._id;
-    const { productId, quantity } = req.body;
-
-    if (!productId || !quantity) {
-      throw new Error("Missing inputs");
+    const { _id } = req.user;
+    const { pid, quantity, color } = req.body;
+    if (!pid || !quantity || !color) {
+      throw new Error('Ko được để trống !');
     }
 
-    const user = await User.findById(userId).select("cart");
+    const user = await User.findById(_id).select('cart');
+    const alreadyProduct = user?.cart?.find(el => el.product.toString() === pid);
 
-    const alreadyProductIndex = user.cart.findIndex(
-      (item) => item.productId.toString() === productId
-    );
+    if (alreadyProduct) {
+      if (alreadyProduct.color === color) {
+        const response = await User.updateOne(
+          { cart: { $elemMatch: alreadyProduct } },
+          { $set: { "cart.$.quantity": quantity } },
+          { new: true }
+        );
 
-    if (alreadyProductIndex !== -1) {
-      // Nếu sản phẩm đã tồn tại trong giỏ hàng, cộng dồn số lượng
-      user.cart[alreadyProductIndex].quantity += quantity;
+        return res.status(200).json({
+          success: response ? true : false,
+          updatedUser: response ? response : 'Some thing went wrong'
+        });
+      } else {
+        const response = await User.findByIdAndUpdate(
+          _id,
+          { $push: { cart: { product: pid, quantity, color } } },
+          { new: true }
+        );
+
+        return res.status(200).json({
+          success: response ? true : false,
+          updatedUser: response ? response : 'Some thing went wrong'
+        });
+      }
     } else {
-      // Nếu sản phẩm chưa tồn tại trong giỏ hàng, thêm mới
-      user.cart.push({ productId, quantity });
+      const response = await User.findByIdAndUpdate(
+        _id,
+        { $push: { cart: { product: pid, quantity, color } } },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: response ? true : false,
+        updatedUser: response ? response : 'Some thing went wrong'
+      });
     }
-
-    const response = await user.save();
-
-    return res
-      .status(200)
-      .json({ message: "Add to cart success!", updateUser: response });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-export const deleteCart = async (req, res) => {
-  try {
-    const userId = req.user?._id;
-    const productId = req.params.id;
-
-    const user = await User.findById(userId).select("cart");
-
-    const newCart = user.cart.filter(
-      (item) => item.productId.toString() !== productId
-    );
-
-    const response = await User.findByIdAndUpdate(
-      userId,
-      { cart: newCart },
-      { new: true }
-    );
-    return res.status(200).json({
-      message: "Remove product in cart success!",
-      updateUser: response,
+    return res.status(500).json({
+      message: "Cập nhật tài khoản thất bại!",
+      error: error.message
     });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
   }
-};
-export const comment = async (req, res) => {
-  try {
-    const userId = req.user?._id;
-    const { productId, description } = req.body;
-
-    const product = await Product.findById(productId);
-    console.log(product)
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    product.comments.push({ userId, description });
-
-    await product.save();
-
-    return res.status(200).json({ message: 'Comment added successfully' });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+}
